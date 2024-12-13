@@ -29,7 +29,7 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
 
                     // Similar average ratings
                     if (book.average_rating - target_book.average_rating).abs() <= 0.5 {
-                        weight += 1;
+                        weight += 1.0;
                     }
 
                     // Similar number of pages
@@ -99,12 +99,15 @@ pub fn analyze_degree_distribution(graph: &DiGraph<&Book, f64>) -> HashMap<usize
     sorted_degrees.sort_by(|a, b| b.0.cmp(a.0)); // Sort by degree descending
 
     println!("Top 10 Degree Distribution:");
-    for (degree, (count, percentage)) in sorted_degrees.into_iter().take(10) {
+    let top_10 = sorted_degrees.into_iter().take(10).collect::<Vec<_>>();
+    for (degree, (count, percentage)) in &top_10 {
         println!("Degree: {}, Count: {}, Percentage: {:.2}%", degree, count, percentage);
     }
 
-    degree_distribution
+    // Return only the top 10 as a HashMap
+    top_10.into_iter().map(|(&degree, &stats)| (degree, stats)).collect()
 }
+
 
 pub fn find_most_similar_neighbors<'a>(graph: &'a DiGraph<&'a Book, f64>) -> Option<(&'a String, &'a String, f64)> {
     let mut most_similar = None;

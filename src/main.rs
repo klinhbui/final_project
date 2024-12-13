@@ -28,10 +28,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             // 2. Analyze degree distribution
             let degree_distribution = analyze_degree_distribution(&graph);
-            println!("Degree Distribution:");
-            for (degree, (count, percentage)) in degree_distribution {
-                println!("Degree: {}, Count: {}, Percentage: {:.2}%", degree, count, percentage);
-            }
 
             // 3. Find the most similar neighbors
             if let Some((source, target, similarity)) = find_most_similar_neighbors(&graph) {
