@@ -6,76 +6,54 @@ use crate::dataprep::Book;
 pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
     let mut graph = DiGraph::new();
     let mut node_map = HashMap::new();
+    let mut edge_added = 0; // Declare edge_added
 
     // Add nodes
     for book in books {
         let node = graph.add_node(book);
-        if let Some(book_id) = book.book_id {
-            node_map.insert(book_id, node);
-        }
+        node_map.insert(book.title.clone(), node); // Use title as the key
     }
 
     // Add edges based on relationships
     for book in books {
-        if let Some(book_id) = book.book_id {
-            if let Some(&source) = node_map.get(&book_id) {
-                for (&target_id, &target) in &node_map {
-                    if book_id != target_id {
-                        // Clone target_book to disconnect it from graph borrow
-                        let target_book = graph.node_weight(target).unwrap().clone();
+        if let Some(&source) = node_map.get(&book.title) {
+            for (target_title, &target) in &node_map {
+                if &book.title != target_title {
+                    let target_book = graph.node_weight(target).unwrap().clone();
+                    let mut weight = 0.0;
 
-                        let mut weight = 0.0;
+                    // Similar average ratings
+                    if (book.average_rating - target_book.average_rating).abs() <= 1.0 {
+                        weight += 0.5;
+                    }
 
-                        // Debugging: Log the comparison details
-                        println!(
-                            "Comparing '{}' with '{}'",
-                            book.title, target_book.title
-                        );
-                        println!(
-                            "Rating difference: {:.2}, Pages difference: {}, Same publisher: {}",
-                            (book.average_rating - target_book.average_rating).abs(),
-                            if let (Some(p1), Some(p2)) = (book.num_pages, target_book.num_pages) {
-                                (p1 as i32 - p2 as i32).abs()
-                            } else {
-                                -1 // Indicator for missing pages
-                            },
-                            book.publisher == target_book.publisher
-                        );
-
-                        // Similar average ratings
-                        if (book.average_rating - target_book.average_rating).abs() <= 2.0 {
+                    // Similar number of pages
+                    if let (Some(pages1), Some(pages2)) = (book.num_pages, target_book.num_pages) {
+                        if (pages1 as i32 - pages2 as i32).abs() <= 300 {
                             weight += 0.5;
                         }
+                    }
 
-                        // Similar number of pages
-                        if let (Some(pages1), Some(pages2)) = (book.num_pages, target_book.num_pages) {
-                            if (pages1 as i32 - pages2 as i32).abs() <= 500 {
-                                weight += 0.5;
-                            }
-                        }
+                    // Same publisher
+                    if book.publisher == target_book.publisher {
+                        weight += 1.0;
+                    }
 
-                        // Same publisher
-                        if book.publisher == target_book.publisher {
-                            weight += 0.2;
-                        }
-
-                        if weight == 0.0 {
-                            weight = 0.1; // Minimal connection weight
-                            println!(
-                                "Adding fallback edge between '{}' and '{}'",
-                                book.title, target_book.title
-                            );
-                            graph.add_edge(source, target, weight);
-                        }
-                        
+                    // Add edge if weight > 0
+                    if weight > 0.0 {
+                        graph.add_edge(source, target, weight);
+                        edge_added += 1; // Increment edge count
                     }
                 }
             }
         }
     }
 
+    println!("Edges added: {}", edge_added); // Print edge count
     graph
 }
+
+
 
 
 
