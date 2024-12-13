@@ -23,6 +23,26 @@ pub struct Book {
     pub publisher: String,
 }
 
+impl Default for Book {
+    fn default() -> Self {
+        Self {
+            book_id: None,                           // Default to None for Option<u32>
+            title: "".to_string(),                   // Empty string
+            authors: "".to_string(),                 // Empty string
+            average_rating: 0.0,                     // Default to 0.0
+            isbn: "".to_string(),                    // Empty string
+            isbn13: "".to_string(),                  // Empty string
+            language_code: None,                     // Default to None for Option<String>
+            num_pages: None,                         // Default to None for Option<u32>
+            ratings_count: 0,                        // Default to 0
+            text_reviews_count: 0,                   // Default to 0
+            publication_date: None,                  // Default to None for Option<String>
+            publisher: "".to_string(),               // Empty string
+        }
+    }
+}
+
+
 pub fn parse_csv(file_path: &Path) -> Result<Vec<Book>, Box<dyn Error>> {
     let file = File::open(file_path)?;
     let mut rdr = csv::Reader::from_reader(file);

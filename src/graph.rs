@@ -127,3 +127,84 @@ pub fn find_most_similar_neighbors<'a>(graph: &'a DiGraph<&'a Book, f64>) -> Opt
 
     most_similar
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use petgraph::graph::DiGraph;
+
+    fn sample_books() -> Vec<Book> {
+        vec![
+            Book {
+                title: "Book A".to_string(),
+                authors: "Author X".to_string(),
+                average_rating: 4.5,
+                num_pages: Some(300),
+                publisher: "Publisher A".to_string(),
+                ..Default::default()
+            },
+            Book {
+                title: "Book B".to_string(),
+                authors: "Author X".to_string(),
+                average_rating: 4.0,
+                num_pages: Some(320),
+                publisher: "Publisher A".to_string(),
+                ..Default::default()
+            },
+            Book {
+                title: "Book C".to_string(),
+                authors: "Author Y".to_string(),
+                average_rating: 3.8,
+                num_pages: Some(150),
+                publisher: "Publisher B".to_string(),
+                ..Default::default()
+            },
+            Book {
+                title: "Book D".to_string(),
+                authors: "Author Y".to_string(),
+                average_rating: 3.9,
+                num_pages: Some(145),
+                publisher: "Publisher B".to_string(),
+                ..Default::default()
+            },
+        ]
+    }
+
+    #[test]
+    fn test_build_graph() {
+        let books = sample_books();
+        let graph = build_graph(&books);
+
+        assert_eq!(graph.node_count(), 4, "Graph should have 4 nodes.");
+        assert!(graph.edge_count() > 0, "Graph should have edges.");
+    }
+
+    #[test]
+    fn test_find_highly_connected_nodes() {
+        let books = sample_books();
+        let graph = build_graph(&books);
+
+        let top_nodes = find_highly_connected_nodes(&graph);
+        assert!(!top_nodes.is_empty(), "There should be highly connected nodes.");
+        assert_eq!(top_nodes.len(), 4.min(5), "The number of top nodes should match the graph size or be 5.");
+    }
+
+    #[test]
+    fn test_analyze_degree_distribution() {
+        let books = sample_books();
+        let graph = build_graph(&books);
+
+        let degree_distribution = analyze_degree_distribution(&graph);
+        assert!(!degree_distribution.is_empty(), "Degree distribution should not be empty.");
+        assert!(degree_distribution.iter().all(|(_, (count, _))| *count > 0), "All degrees should have non-zero counts.");
+    }
+
+    #[test]
+    fn test_find_most_similar_neighbors() {
+        let books = sample_books();
+        let graph = build_graph(&books);
+
+        let most_similar = find_most_similar_neighbors(&graph);
+        assert!(most_similar.is_some(), "There should be a pair of most similar neighbors.");
+    }
+}
