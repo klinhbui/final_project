@@ -22,21 +22,26 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
                     let target_book = graph.node_weight(target).unwrap().clone();
                     let mut weight = 0.0;
 
+                    // Shared authors
+                    if book.authors == target_book.authors {
+                        weight += 0.1;
+                    }
+
                     // Similar average ratings
-                    if (book.average_rating - target_book.average_rating).abs() <= 1.0 {
-                        weight += 0.5;
+                    if (book.average_rating - target_book.average_rating).abs() <= 0.5 {
+                        weight += 1;
                     }
 
                     // Similar number of pages
                     if let (Some(pages1), Some(pages2)) = (book.num_pages, target_book.num_pages) {
-                        if (pages1 as i32 - pages2 as i32).abs() <= 300 {
+                        if (pages1 as i32 - pages2 as i32).abs() <= 50 {
                             weight += 0.5;
                         }
                     }
 
                     // Same publisher
                     if book.publisher == target_book.publisher {
-                        weight += 1.0;
+                        weight += 0.2;
                     }
 
                     // Add edge if weight > 0
@@ -71,6 +76,7 @@ pub fn find_highly_connected_nodes<'a>(graph: &'a DiGraph<&'a Book, f64>) -> Vec
     node_connections.into_iter().take(5).collect()
 }
 
+
 pub fn analyze_degree_distribution(graph: &DiGraph<&Book, f64>) -> HashMap<usize, (usize, f64)> {
     let mut degree_counts = HashMap::new();
     let total_nodes = graph.node_count();
@@ -86,6 +92,15 @@ pub fn analyze_degree_distribution(graph: &DiGraph<&Book, f64>) -> HashMap<usize
     for (degree, count) in degree_counts.iter() {
         let percentage = (*count as f64 / total_nodes as f64) * 100.0;
         degree_distribution.insert(*degree, (*count, percentage));
+    }
+
+    // Sort and print the top 10 degrees
+    let mut sorted_degrees: Vec<_> = degree_distribution.iter().collect();
+    sorted_degrees.sort_by(|a, b| b.0.cmp(a.0)); // Sort by degree descending
+
+    println!("Top 10 Degree Distribution:");
+    for (degree, (count, percentage)) in sorted_degrees.into_iter().take(10) {
+        println!("Degree: {}, Count: {}, Percentage: {:.2}%", degree, count, percentage);
     }
 
     degree_distribution
