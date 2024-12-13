@@ -25,11 +25,6 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
                         let target_book = graph.node_weight(target).unwrap();
                         let mut weight = 0.0;
 
-                        // Shared authors
-                        if book.authors == target_book.authors {
-                            weight += 1.0;
-                        }
-
                         // Similar average ratings
                         if (book.average_rating - target_book.average_rating).abs() <= 0.5 {
                             weight += 0.5;
