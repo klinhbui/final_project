@@ -3,7 +3,6 @@ use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 use crate::dataprep::Book;
 
-
 pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
     let mut graph = DiGraph::new();
     let mut node_map = HashMap::new();
@@ -22,31 +21,53 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
             if let Some(&source) = node_map.get(&book_id) {
                 for (&target_id, &target) in &node_map {
                     if book_id != target_id {
-                        let target_book = graph.node_weight(target).unwrap();
+                        // Clone target_book to disconnect it from graph borrow
+                        let target_book = graph.node_weight(target).unwrap().clone();
+
                         let mut weight = 0.0;
 
+                        // Debugging: Log the comparison details
+                        println!(
+                            "Comparing '{}' with '{}'",
+                            book.title, target_book.title
+                        );
+                        println!(
+                            "Rating difference: {:.2}, Pages difference: {}, Same publisher: {}",
+                            (book.average_rating - target_book.average_rating).abs(),
+                            if let (Some(p1), Some(p2)) = (book.num_pages, target_book.num_pages) {
+                                (p1 as i32 - p2 as i32).abs()
+                            } else {
+                                -1 // Indicator for missing pages
+                            },
+                            book.publisher == target_book.publisher
+                        );
+
                         // Similar average ratings
-                        if (book.average_rating - target_book.average_rating).abs() <= 0.5 {
+                        if (book.average_rating - target_book.average_rating).abs() <= 2.0 {
                             weight += 0.5;
                         }
 
                         // Similar number of pages
                         if let (Some(pages1), Some(pages2)) = (book.num_pages, target_book.num_pages) {
-                            if (pages1 as i32 - pages2 as i32).abs() <= 50 {
+                            if (pages1 as i32 - pages2 as i32).abs() <= 500 {
                                 weight += 0.5;
                             }
                         }
-                        
-                        //  Use a Single Attribute for Matching
-                        if (book.average_rating - target_book.average_rating).abs() <= 1.0 {
-                            graph.add_edge(source, target, 1.0);
-                        }
-                        
 
-                        // Add edge if weight > 0
-                        if weight > 0.0 {
+                        // Same publisher
+                        if book.publisher == target_book.publisher {
+                            weight += 0.2;
+                        }
+
+                        if weight == 0.0 {
+                            weight = 0.1; // Minimal connection weight
+                            println!(
+                                "Adding fallback edge between '{}' and '{}'",
+                                book.title, target_book.title
+                            );
                             graph.add_edge(source, target, weight);
                         }
+                        
                     }
                 }
             }
@@ -71,7 +92,6 @@ pub fn find_highly_connected_nodes<'a>(graph: &'a DiGraph<&'a Book, f64>) -> Vec
 
     node_connections.into_iter().take(5).collect()
 }
-
 
 pub fn analyze_degree_distribution(graph: &DiGraph<&Book, f64>) -> HashMap<usize, (usize, f64)> {
     let mut degree_counts = HashMap::new();
