@@ -4,6 +4,7 @@ use std::path::Path;
 use serde::Deserialize;
 
 // Define the Book struct to hold parsed data
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct Book {
     #[serde(rename = "id")]
@@ -39,3 +40,4 @@ pub fn parse_csv(file_path: &Path) -> Result<Vec<Book>, Box<dyn Error>> {
 
     Ok(books)
 }
+
