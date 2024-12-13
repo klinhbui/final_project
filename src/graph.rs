@@ -36,6 +36,12 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
                                 weight += 0.5;
                             }
                         }
+                        
+                        //  Use a Single Attribute for Matching
+                        if (book.average_rating - target_book.average_rating).abs() <= 1.0 {
+                            graph.add_edge(source, target, 1.0);
+                        }
+                        
 
                         // Add edge if weight > 0
                         if weight > 0.0 {
