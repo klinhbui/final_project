@@ -3,19 +3,20 @@ use std::fs::File;
 use std::path::Path;
 use serde::Deserialize;
 
-// Define the Book struct to hold parsed data
-#[allow(dead_code)]
+// book struct to hold parsed data
+// some attribute are optional since the graphs doesn't directly require it + prevent missing value/ crashing
+#[allow(dead_code)] // for testing to get rid of multiple warnings
 #[derive(Debug, Deserialize)]
 pub struct Book {
-    #[serde(rename = "id")]
-    pub book_id: Option<u32>, // optional
+    #[serde(rename = "id")] // connect book_id to id
+    pub book_id: Option<u32>, // optional 
     pub title: String,
     pub authors: String,
     pub average_rating: f64,
     pub isbn: String,
     pub isbn13: String,
     pub language_code: Option<String>, // optional
-    pub num_pages: Option<u32>, // Optional field for missing values
+    pub num_pages: Option<u32>, // optional field due to missing values (prevent crashing)
     pub ratings_count: u32,
     pub text_reviews_count: u32,
     #[serde(rename = "publication_date")]
