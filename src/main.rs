@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             // 2. Analyze degree distribution
             let degree_distribution = analyze_degree_distribution(&graph);
-            let threshold = 50000; // Adjust threshold as needed
+            let threshold = 50000; 
             println!("Books with degree greater than {}:", threshold);
             for node_idx in graph.node_indices() {
                 let book = graph[node_idx];

@@ -6,15 +6,14 @@ use crate::dataprep::Book;
 pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
     let mut graph = DiGraph::new();
     let mut node_map = HashMap::new();
-    let mut edge_added = 0; // Declare edge_added
 
-    // Add nodes
+    // Add nodes = book
     for book in books {
         let node = graph.add_node(book);
         node_map.insert(book.title.clone(), node); // Use title as the key
     }
 
-    // Add edges based on relationships
+    // Add edges based on relationships: Shared Author(0.1); Similar Rating (1.0); Pages (0.5); Shared Publisher (0.2)
     for book in books {
         if let Some(&source) = node_map.get(&book.title) {
             for (target_title, &target) in &node_map {
@@ -47,14 +46,12 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
                     // Add edge if weight > 0
                     if weight > 0.0 {
                         graph.add_edge(source, target, weight);
-                        edge_added += 1; // Increment edge count
                     }
                 }
             }
         }
     }
 
-    println!("Edges added: {}", edge_added); // Print edge count
     graph
 }
 

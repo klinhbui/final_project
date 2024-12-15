@@ -24,20 +24,21 @@ pub struct Book {
     pub publisher: String,
 }
 
+// reformating the data defaulting it to a specific data type incase of missing value
 impl Default for Book {
     fn default() -> Self {
         Self {
-            book_id: None,                           // Default to None for Option<u32>
+            book_id: None,                           // None 
             title: "".to_string(),                   // Empty string
             authors: "".to_string(),                 // Empty string
-            average_rating: 0.0,                     // Default to 0.0
+            average_rating: 0.0,                     // 0.0
             isbn: "".to_string(),                    // Empty string
             isbn13: "".to_string(),                  // Empty string
-            language_code: None,                     // Default to None for Option<String>
-            num_pages: None,                         // Default to None for Option<u32>
-            ratings_count: 0,                        // Default to 0
-            text_reviews_count: 0,                   // Default to 0
-            publication_date: None,                  // Default to None for Option<String>
+            language_code: None,                     // None 
+            num_pages: None,                         // None
+            ratings_count: 0,                        // 0
+            text_reviews_count: 0,                   // 0
+            publication_date: None,                  // None
             publisher: "".to_string(),               // Empty string
         }
     }
