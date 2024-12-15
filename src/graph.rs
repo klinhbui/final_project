@@ -13,7 +13,7 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
         node_map.insert(book.title.clone(), node); // Use title as the key
     }
 
-    // Add edges based on relationships: Shared Author(0.1); Similar Rating (1.0); Pages (1.5); Shared Publisher (0.2)
+    // Add edges based on relationships: Shared Author(0.1); Similar Rating (1.0); Pages (1.5); Shared Publisher (0.2); Rating Count (0.5); Review Count (0.7)
     for book in books {
         if let Some(&source) = node_map.get(&book.title) {
             for (target_title, &target) in &node_map {
@@ -36,6 +36,16 @@ pub fn build_graph(books: &[Book]) -> DiGraph<&Book, f64> {
                         if (pages1 as i32 - pages2 as i32).abs() <= 50 {
                             weight += 1.5;
                         }
+                    }
+
+                    // Similar ratings count
+                    if (book.ratings_count as i32 - target_book.ratings_count as i32).abs() <= 1000 {
+                        weight += 0.5;
+                    }
+
+                    // Similar text reviews count
+                    if (book.text_reviews_count as i32 - target_book.text_reviews_count as i32).abs() <= 100 {
+                        weight += 0.7;
                     }
 
                     // Same publisher
